@@ -1,41 +1,52 @@
-import { Layout, Typography } from "antd";
-import { Routes, Route } from "react-router-dom";
-import DrawerComponent from "./DrawerComponent";
-import FormComponent from "./FormComponent";
-import ModalComponent from "./ModalComponent";
-import SideNavMenu from "./SideNavMenu";
-import TableComponent from "./TableComponent";
-import TabComponent from "./TabsComponent";
-import TreeComponent from "./TreeComponent";
-
-const { Header, Sider, Content } = Layout;
+import { Card, Typography } from "antd";
+import React, { useEffect, useState } from "react";
+import { Switch } from "antd";
+import { useThemeSwitcher } from "react-css-theme-switcher";
 
 function AppLayout() {
+  const [toggleTheme, setToggleTheme] = useState(false);
+  const { switcher, themes, currentTheme } = useThemeSwitcher();
+
+  const toggleThemeHandler = () => {
+    setToggleTheme((prev) => {
+      switcher({ theme: prev ? themes.light : themes.dark });
+      localStorage.setItem("theme", prev ? themes.light : themes.dark)
+      return !prev;
+    });
+  };
+
+  useEffect(() => {
+     const theme = localStorage.getItem("theme"); 
+     if(theme) {
+       setToggleTheme(theme !== "light")
+           localStorage.setItem("theme", theme === "light" ? "light" : "dark" )
+            switcher({ theme: theme === "light" ? themes.light : themes.dark });
+     }
+     else {
+        setToggleTheme(() => {
+            switcher({ theme: themes.light });
+            localStorage.setItem("theme", themes.light)
+            return true;
+          });
+     }
+  }, [switcher, themes.dark, themes.light])
+  
+  
+
   return (
-    <>
-      <Layout>
-        <Sider>
-            <Typography.Title level={4} className="white-text logo">
-                 Ant Components
-            </Typography.Title>
-            <SideNavMenu />
-        </Sider>
-        <Layout>
-          <Header>
-          </Header>
-          <Content className="content">
-              <Routes>
-                  <Route path="/table" element={<TableComponent />}/>
-                  <Route path="/tree" element={<TreeComponent />}/>
-                  <Route path="/tab" element={<TabComponent />}/>
-                  <Route path="/drawer" element={<DrawerComponent />}/>
-                  <Route path="/modal" element={<ModalComponent />}/>
-                  <Route path="/" element={<FormComponent />} />
-              </Routes>
-          </Content>
-        </Layout>
-      </Layout>
-    </>
+    <div className="bg">
+      <Card
+        title={
+          <div className="d-flex space-between align-center">
+            <Typography.Title level={5}>Antd Card</Typography.Title>
+            <Switch checked={toggleTheme} onChange={toggleThemeHandler} />
+          </div>
+        }
+      >
+        This is a theme card implemented in antd to demonstrate dark and light
+        theme
+      </Card>
+    </div>
   );
 }
 
